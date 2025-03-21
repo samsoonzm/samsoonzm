@@ -1,9 +1,7 @@
 <!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF论文翻译工具</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
-    <script src="https://unpkg.com/pdfjs-dist@2.10.377/build/pdf.worker.min.js"></script>
+    <title>链式思维提示引发大型语言模型的推理能力</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -32,8 +30,6 @@
             padding: 20px;
             width: 50%;
             position: relative;
-            overflow-y: auto;
-            max-height: 600px;
         }
         
         .english {
@@ -44,109 +40,33 @@
             background-color: #f9f9ff;
         }
         
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+        }
+        
         .header {
             text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .upload-container {
-            text-align: center;
-            padding: 30px;
             margin-bottom: 30px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
-        .upload-container h2 {
-            margin-bottom: 20px;
-        }
-        
-        .upload-form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-            margin-bottom: 20px;
-        }
-        
-        .file-input-wrapper input[type=file] {
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
-        
-        .file-input-button {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #4285f4;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        
-        .file-input-button:hover {
-            background-color: #3367d6;
-        }
-        
-        .translate-button {
-            padding: 10px 20px;
-            background-color: #34a853;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-        
-        .translate-button:hover {
-            background-color: #2e8b47;
-        }
-        
-        .translate-button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-        
-        .loading {
-            display: none;
+        .subheader {
+            font-style: italic;
+            color: #666;
             text-align: center;
-            margin: 20px 0;
+            margin-bottom: 30px;
         }
         
-        .loading-spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 2s linear infinite;
-            margin: 0 auto 10px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .file-name {
+        .figure-caption {
+            text-align: center;
+            font-style: italic;
             margin-top: 10px;
-            font-size: 14px;
             color: #666;
         }
         
-        /* 段落高亮样式 */
+        /* 新增的样式 */
         .en-segment, .zh-segment {
             padding: 2px 0;
             border-radius: 3px;
@@ -161,44 +81,21 @@
             background-color: #ffc10740;
         }
         
-        /* 进度条样式 */
-        .progress-container {
-            width: 100%;
-            max-width: 400px;
-            margin: 20px auto;
-            display: none;
-        }
-        
-        .progress-bar {
-            height: 10px;
-            background-color: #e0e0e0;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        
-        .progress {
-            height: 100%;
-            background-color: #4285f4;
-            width: 0;
-            transition: width 0.3s;
-        }
-        
-        .progress-text {
-            text-align: center;
+        /* 添加小工具提示 */
+        .tooltip {
+            position: fixed;
+            background: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
             font-size: 14px;
-            margin-top: 5px;
-            color: #666;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 1000;
+            max-width: 300px;
         }
         
-        /* 错误消息样式 */
-        .error-message {
-            color: #d32f2f;
-            margin: 10px 0;
-            text-align: center;
-            display: none;
-        }
-        
-        /* 响应式设计 */
         @media (max-width: 768px) {
             .translation-container {
                 flex-direction: column;
@@ -206,7 +103,6 @@
             
             .english, .chinese {
                 width: 100%;
-                max-height: 300px;
             }
             
             .english {
@@ -217,213 +113,58 @@
     </style>
 </head>
 <body>
+    <div class="tooltip" id="tooltip"></div>
+    
     <div class="header">
-        <h1>PDF论文翻译工具</h1>
-        <p>上传学术PDF文档，获取中英文对照翻译</p>
+        <h1>链式思维提示引发大型语言模型的推理能力</h1>
+        <h3>Chain-of-Thought Prompting Elicits Reasoning in Large Language Models</h3>
     </div>
     
-    <div class="upload-container">
-        <h2>上传PDF文档</h2>
-        <div class="upload-form">
-            <div class="file-input-wrapper">
-                <div class="file-input-button">选择PDF文件</div>
-                <input type="file" id="pdf-file" accept=".pdf">
-            </div>
-            <div class="file-name" id="file-name">未选择文件</div>
-            <button id="translate-button" class="translate-button" disabled="">翻译文档</button>
-        </div>
-        
-        <div class="progress-container" id="progress-container">
-            <div class="progress-bar">
-                <div class="progress" id="progress"></div>
-            </div>
-            <div class="progress-text" id="progress-text">正在处理第1页，共0页...</div>
-        </div>
-        
-        <div class="loading" id="loading">
-            <div class="loading-spinner"></div>
-            <p>正在翻译，请稍候...</p>
-        </div>
-        
-        <div class="error-message" id="error-message"></div>
+    <div class="subheader">
+        <p>Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Brian Ichter, Fei Xia, Ed H. Chi, Quoc V. Le, Denny Zhou</p>
+        <p>Google Research, Brain Team</p>
+        <p>{jasonwei,dennyzhou}@google.com</p>
     </div>
-    
-    <div class="translation-container" id="translation-container" style="display: none;">
-        <div class="english" id="english-content"></div>
-        <div class="chinese" id="chinese-content"></div>
+
+    <div class="translation-container">
+        <div class="english">
+            <h2>Abstract</h2>
+            <p><span class="en-segment" data-id="abstract-1">We explore how generating a chain of thought—a series of intermediate reasoning steps—significantly improves the ability of large language models to perform complex reasoning.</span> <span class="en-segment" data-id="abstract-2">In particular, we show how such reasoning abilities emerge naturally in sufficiently large language models via a simple method called chain-of-thought prompting, where a few chain of thought demonstrations are provided as exemplars in prompting.</span></p>
+            <p><span class="en-segment" data-id="abstract-3">Experiments on three large language models show that chain-of-thought prompting improves performance on a range of arithmetic, commonsense, and symbolic reasoning tasks.</span> <span class="en-segment" data-id="abstract-4">The empirical gains can be striking. For instance, prompting a PaLM 540B with just eight chain-of-thought exemplars achieves state-of-the-art accuracy on the GSM8K benchmark of math word problems, surpassing even finetuned GPT-3 with a verifier.</span></p>
+        </div>
+        <div class="chinese">
+            <h2>摘要</h2>
+            <p><span class="zh-segment" data-id="abstract-1">我们探索了如何通过生成思维链（一系列中间推理步骤）显著提高大型语言模型执行复杂推理的能力。</span> <span class="zh-segment" data-id="abstract-2">特别是，我们展示了这种推理能力如何在足够大的语言模型中通过一种简单的方法自然地出现，这种方法称为链式思维提示，其中在提示中提供了几个链式思维示例作为范例。</span></p>
+            <p><span class="zh-segment" data-id="abstract-3">对三个大型语言模型的实验表明，链式思维提示提高了在算术、常识和符号推理任务上的表现。</span> <span class="zh-segment" data-id="abstract-4">实证收益可能是惊人的。例如，仅用八个链式思维示例提示PaLM 540B模型就在GSM8K数学应用题基准测试中达到了最先进的准确率，甚至超过了带验证器的微调GPT-3。</span></p>
+        </div>
     </div>
-    
+
+    <div style="text-align: center;">
+        <img src="https://i.imgur.com/3v6QZs8.png" alt="Figure 1: Chain-of-thought prompting example">
+        <p class="figure-caption">图1：链式思维提示使大型语言模型能够处理复杂的算术、常识和符号推理任务。链式思维推理过程以高亮显示。</p>
+    </div>
+
+    <div class="translation-container">
+        <div class="english">
+            <h2>1 Introduction</h2>
+            <p><span class="en-segment" data-id="intro-1">The NLP landscape has recently been revolutionized by language models (Peters et al., 2018; Devlin et al., 2019; Brown et al., 2020, inter alia).</span> <span class="en-segment" data-id="intro-2">Scaling up the size of language models has been shown to confer a range of benefits, such as improved performance and sample efficiency (Kaplan et al., 2020; Brown et al., 2020, inter alia).</span> <span class="en-segment" data-id="intro-3">However, scaling up model size alone has not proved sufficient for achieving high performance on challenging tasks such as arithmetic, commonsense, and symbolic reasoning (Rae et al., 2021).</span></p>
+            <p><span class="en-segment" data-id="intro-4">This work explores how the reasoning ability of large language models can be unlocked by a simple method motivated by two ideas.</span> <span class="en-segment" data-id="intro-5">First, techniques for arithmetic reasoning can benefit from generating natural language rationales that lead to the final answer.</span> <span class="en-segment" data-id="intro-6">Prior work has given models the ability to generate natural language intermediate steps by training from scratch (Ling et al., 2017) or finetuning a pretrained model (Cobbe et al., 2021), in addition to neuro-symbolic methods that use formal languages instead of natural language (Roy and Roth, 2015; Chiang and Chen, 2019; Amini et al., 2019; Chen et al., 2019).</span> <span class="en-segment" data-id="intro-7">Second, large language models offer the exciting prospect of in-context few-shot learning via prompting.</span> <span class="en-segment" data-id="intro-8">That is, instead of finetuning a separate language model checkpoint for each new task, one can simply "prompt" the model with a few input–output exemplars demonstrating the task.</span> <span class="en-segment" data-id="intro-9">Remarkably, this has been successful for a range of simple question-answering tasks (Brown et al., 2020).</span></p>
+        </div>
+        <div class="chinese">
+            <h2>1 引言</h2>
+            <p><span class="zh-segment" data-id="intro-1">自然语言处理领域最近被语言模型彻底改变（Peters等，2018；Devlin等，2019；Brown等，2020，等）。</span> <span class="zh-segment" data-id="intro-2">扩大语言模型的规模已被证明能带来一系列好处，如提高性能和样本效率（Kaplan等，2020；Brown等，2020，等）。</span> <span class="zh-segment" data-id="intro-3">然而，仅仅扩大模型规模并不足以在具有挑战性的任务（如算术、常识和符号推理）上取得高性能（Rae等，2021）。</span></p>
+            <p><span class="zh-segment" data-id="intro-4">本研究探讨了如何通过一种受两个想法驱动的简单方法来释放大型语言模型的推理能力。</span> <span class="zh-segment" data-id="intro-5">首先，算术推理技术可以受益于生成自然语言理由，从而得出最终答案。</span> <span class="zh-segment" data-id="intro-6">先前的工作通过从头开始训练（Ling等，2017）或微调预训练模型（Cobbe等，2021）赋予模型生成自然语言中间步骤的能力，此外还有使用形式语言而非自然语言的神经符号方法（Roy和Roth，2015；Chiang和Chen，2019；Amini等，2019；Chen等，2019）。</span> <span class="zh-segment" data-id="intro-7">其次，大型语言模型通过提示提供了令人兴奋的上下文少样本学习前景。</span> <span class="zh-segment" data-id="intro-8">也就是说，不必为每个新任务微调单独的语言模型检查点，只需简单地使用几个输入-输出示例"提示"模型演示任务。</span> <span class="zh-segment" data-id="intro-9">值得注意的是，这在一系列简单的问答任务中已经取得了成功（Brown等，2020）。</span></p>
+        </div>
+    </div>
+
+    <!-- 更多的翻译内容可以按照上面的格式继续添加 -->
+
     <script>
-        // 初始化PDF.js
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@2.10.377/build/pdf.worker.min.js';
-        
-        // 获取DOM元素
-        const fileInput = document.getElementById('pdf-file');
-        const fileName = document.getElementById('file-name');
-        const translateButton = document.getElementById('translate-button');
-        const loading = document.getElementById('loading');
-        const progressContainer = document.getElementById('progress-container');
-        const progress = document.getElementById('progress');
-        const progressText = document.getElementById('progress-text');
-        const errorMessage = document.getElementById('error-message');
-        const translationContainer = document.getElementById('translation-container');
-        const englishContent = document.getElementById('english-content');
-        const chineseContent = document.getElementById('chinese-content');
-        
-        // 存储PDF的文本内容
-        let pdfText = '';
-        let totalPages = 0;
-        
-        // 监听文件选择
-        fileInput.addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                const file = e.target.files[0];
-                fileName.textContent = file.name;
-                translateButton.disabled = false;
-                
-                // 重置界面
-                errorMessage.style.display = 'none';
-                translationContainer.style.display = 'none';
-                englishContent.innerHTML = '';
-                chineseContent.innerHTML = '';
-            } else {
-                fileName.textContent = '未选择文件';
-                translateButton.disabled = true;
-            }
-        });
-        
-        // 监听翻译按钮点击
-        translateButton.addEventListener('click', function() {
-            if (fileInput.files.length === 0) return;
-            
-            const file = fileInput.files[0];
-            
-            // 显示加载状态
-            loading.style.display = 'block';
-            progressContainer.style.display = 'block';
-            translateButton.disabled = true;
-            errorMessage.style.display = 'none';
-            
-            // 读取PDF文件
-            const fileReader = new FileReader();
-            
-            fileReader.onload = function() {
-                const typedArray = new Uint8Array(this.result);
-                
-                // 加载PDF文档
-                pdfjsLib.getDocument(typedArray).promise.then(function(pdf) {
-                    totalPages = pdf.numPages;
-                    progressText.textContent = `正在处理第1页，共${totalPages}页...`;
-                    
-                    // 提取所有页面的文本
-                    let pendingPages = [];
-                    for (let i = 1; i <= totalPages; i++) {
-                        pendingPages.push(i);
-                    }
-                    
-                    // 保存所有文本内容
-                    let allTextContent = [];
-                    
-                    // 递归提取页面文本
-                    function extractPageText(pageNum, index) {
-                        return pdf.getPage(pageNum).then(function(page) {
-                            return page.getTextContent().then(function(textContent) {
-                                // 更新进度
-                                progress.style.width = `${(index / totalPages) * 100}%`;
-                                progressText.textContent = `正在处理第${pageNum}页，共${totalPages}页...`;
-                                
-                                // 将文本内容添加到数组
-                                allTextContent[pageNum - 1] = textContent.items.map(item => item.str).join(' ');
-                                
-                                // 继续提取下一页
-                                if (pendingPages.length > 0) {
-                                    const nextPage = pendingPages.shift();
-                                    return extractPageText(nextPage, index + 1);
-                                }
-                                
-                                return allTextContent;
-                            });
-                        });
-                    }
-                    
-                    // 开始提取第一页
-                    const firstPage = pendingPages.shift();
-                    extractPageText(firstPage, 1).then(function(allTextContent) {
-                        // 组合所有页面文本
-                        pdfText = allTextContent.join('\n\n');
-                        
-                        // 模拟翻译过程（在实际应用中，这里应该调用翻译API）
-                        simulateTranslation(pdfText);
-                    }).catch(function(error) {
-                        console.error('提取PDF文本时出错:', error);
-                        showError('提取PDF文本时出错，请重试或选择其他PDF文件。');
-                    });
-                }).catch(function(error) {
-                    console.error('加载PDF时出错:', error);
-                    showError('无法加载PDF文件，请确保您上传了有效的PDF文档。');
-                });
-            };
-            
-            fileReader.onerror = function() {
-                showError('读取文件时出错，请重试。');
-            };
-            
-            fileReader.readAsArrayBuffer(file);
-        });
-        
-        // 模拟翻译过程
-        function simulateTranslation(text) {
-            // 在实际应用中，这里应该调用翻译API
-            // 这是一个模拟，实际上只是将段落进行分割并赋予ID
-            
-            // 简单的段落分割
-            const paragraphs = text.split('\n\n').filter(p => p.trim() !== '');
-            
-            // 清除加载状态
-            loading.style.display = 'none';
-            progressContainer.style.display = 'none';
-            
-            // 显示翻译容器
-            translationContainer.style.display = 'flex';
-            
-            // 重置按钮状态
-            translateButton.disabled = false;
-            
-            // 添加英文内容
-            let enHtml = '<h2>原文</h2>';
-            
-            // 添加中文内容
-            let zhHtml = '<h2>翻译</h2>';
-            
-            // 创建英文段落和对应的中文翻译段落
-            paragraphs.forEach((paragraph, index) => {
-                if (paragraph.trim() === '') return;
-                
-                // 模拟中文翻译（实际应用中应该来自翻译API）
-                // 这里我们只做一个简单的替换来演示
-                const translation = `这是第${index + 1}段原文的中文翻译。这只是个示例，实际应用中应通过翻译API获取真实翻译。`;
-                
-                // 为每个段落分配唯一ID
-                const id = `p-${index}`;
-                
-                // 添加到HTML
-                enHtml += `<p><span class="en-segment" data-id="${id}">${paragraph}</span></p>`;
-                zhHtml += `<p><span class="zh-segment" data-id="${id}">${translation}</span></p>`;
-            });
-            
-            // 更新内容
-            englishContent.innerHTML = enHtml;
-            chineseContent.innerHTML = zhHtml;
-            
-            // 添加鼠标悬停事件
-            setupHoverHighlight();
-        }
-        
-        // 设置悬停高亮功能
-        function setupHoverHighlight() {
+        document.addEventListener('DOMContentLoaded', function() {
             // 获取所有的段落
             const enSegments = document.querySelectorAll('.en-segment');
             const zhSegments = document.querySelectorAll('.zh-segment');
+            const tooltip = document.getElementById('tooltip');
             
             // 为每个英文段落添加事件监听器
             enSegments.forEach(segment => {
@@ -482,17 +223,32 @@
                     }
                 });
             });
-        }
-        
-        // 显示错误消息
-        function showError(message) {
-            loading.style.display = 'none';
-            progressContainer.style.display = 'none';
-            translateButton.disabled = false;
             
-            errorMessage.textContent = message;
-            errorMessage.style.display = 'block';
-        }
+            // 添加提示框功能
+            document.addEventListener('mousemove', function(e) {
+                tooltip.style.left = (e.pageX + 15) + 'px';
+                tooltip.style.top = (e.pageY + 15) + 'px';
+            });
+            
+            // 添加点击功能，点击一段文本会持续高亮，直到点击其他地方
+            document.addEventListener('click', function(e) {
+                // 移除所有持续高亮
+                document.querySelectorAll('.persistent-highlight').forEach(el => {
+                    el.classList.remove('persistent-highlight');
+                });
+                
+                // 如果点击的是段落，添加持续高亮
+                if (e.target.classList.contains('en-segment') || e.target.classList.contains('zh-segment')) {
+                    const id = e.target.getAttribute('data-id');
+                    const pair = document.querySelector(`.en-segment[data-id="${id}"], .zh-segment[data-id="${id}"]`);
+                    
+                    if (pair && pair !== e.target) {
+                        pair.classList.add('persistent-highlight');
+                        e.target.classList.add('persistent-highlight');
+                    }
+                }
+            });
+        });
     </script>
 
 
