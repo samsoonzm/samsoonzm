@@ -1,1156 +1,425 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>一拍即行 - 截图秒变旅行攻略</title>
+    <title>美团推广通投产比 (ROI) 计算器</title>
     <style>
+        /* --- 全局与布局 --- */
         :root {
-            --primary-color: #FF5F6D;
-            --gradient-primary: linear-gradient(45deg, #FF5F6D, #FFC371);
-            --secondary-color: #36D1DC;
-            --gradient-secondary: linear-gradient(45deg, #36D1DC, #5B86E5);
-            --accent-color: #5EFCE8;
-            --dark-color: #353866;
-            --light-color: #FBFBFD;
-            --shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-            --border-radius: 16px;
+            --primary-color: #FF6600; /* 美团橙 */
+            --secondary-color: #333;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-color: #e9ecef;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
-        }
-        
+
         body {
-            background-color: var(--light-color);
-            color: var(--dark-color);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        
-        header {
-            background-color: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        
-        .navbar {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--secondary-color);
+            margin: 0;
+            padding: 20px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
         }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 24px;
-            font-weight: 700;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        
-        .logo-icon {
-            font-size: 32px;
-        }
-        
-        .nav-links {
-            display: flex;
-            gap: 25px;
-        }
-        
-        .nav-links a {
-            text-decoration: none;
-            color: var(--dark-color);
-            font-weight: 500;
-            font-size: 16px;
-            transition: all 0.3s;
-            position: relative;
-        }
-        
-        .nav-links a:after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -4px;
-            left: 0;
-            background: var(--gradient-primary);
-            transition: width 0.3s;
-        }
-        
-        .nav-links a:hover {
-            color: var(--primary-color);
-        }
-        
-        .nav-links a:hover:after {
+
+        .calculator-container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 25px 30px;
             width: 100%;
+            max-width: 700px;
+            transition: all 0.3s ease;
         }
-        
-        .hero {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+
+        /* --- 头部 --- */
+        .header {
             text-align: center;
-            padding: 60px 20px 80px;
-            background: radial-gradient(circle at 90% 10%, rgba(255, 95, 109, 0.08), transparent 30%),
-                        radial-gradient(circle at 10% 90%, rgba(54, 209, 220, 0.08), transparent 30%);
-            border-radius: var(--border-radius);
-            margin: 30px 0;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .hero h1 {
-            font-size: 3rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
             margin-bottom: 25px;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            font-weight: 800;
-            letter-spacing: -0.5px;
         }
-        
-        .hero p {
-            font-size: 1.25rem;
-            max-width: 700px;
-            margin-bottom: 50px;
-            color: #606385;
+
+        .header h1 {
+            color: var(--secondary-color);
+            margin: 0 0 10px 0;
+            font-size: 24px;
         }
-        
-        .upload-container {
-            width: 100%;
-            max-width: 800px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 30px 0;
-            position: relative;
-        }
-        
-        .floating-element {
-            position: absolute;
-            border-radius: 50%;
-            opacity: 0.6;
-            z-index: -1;
-        }
-        
-        .float-1 {
-            width: 80px;
-            height: 80px;
-            background: var(--gradient-primary);
-            top: -30px;
-            right: 10%;
-            animation: float 8s ease-in-out infinite;
-        }
-        
-        .float-2 {
-            width: 60px;
-            height: 60px;
-            background: var(--gradient-secondary);
-            bottom: 10%;
-            left: 5%;
-            animation: float 6s ease-in-out infinite 1s;
-        }
-        
-        .float-3 {
-            width: 40px;
-            height: 40px;
-            background: var(--accent-color);
-            top: 20%;
-            left: 15%;
-            animation: float 7s ease-in-out infinite 2s;
-        }
-        
-        @keyframes float {
-            0% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-            100% { transform: translateY(0) rotate(0deg); }
-        }
-        
-        .upload-area {
-            width: 100%;
-            height: 300px;
-            border: 3px dashed #E0E0F5;
-            border-radius: var(--border-radius);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background-color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 30px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .upload-area:hover {
-            border-color: var(--primary-color);
-            background-color: rgba(255, 95, 109, 0.05);
-            transform: translateY(-5px);
-        }
-        
-        .upload-icon {
-            font-size: 70px;
-            margin-bottom: 20px;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        
-        .upload-text {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--dark-color);
-            margin-bottom: 5px;
-        }
-        
-        .upload-subtext {
-            font-size: 15px;
-            color: #8C8CA1;
-        }
-        
-        .btn {
-            background: var(--gradient-primary);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 30px;
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(255, 95, 109, 0.4);
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-        }
-        
-        .btn:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: var(--gradient-secondary);
-            transition: left 0.3s;
-            z-index: -1;
-        }
-        
-        .btn:hover {
-            box-shadow: 0 6px 20px rgba(255, 95, 109, 0.6);
-            transform: translateY(-2px);
-        }
-        
-        .btn:hover:before {
-            left: 0;
-        }
-        
-        #file-input {
-            display: none;
-        }
-        
-        .how-it-works {
-            margin: 50px 0 80px;
-            text-align: center;
-        }
-        
-        .section-title {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            font-weight: 700;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        
-        .section-subtitle {
-            font-size: 1.1rem;
-            color: #606385;
-            max-width: 700px;
-            margin: 0 auto 50px;
-        }
-        
-        .steps {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 40px;
-            flex-wrap: wrap;
-        }
-        
-        .step-card {
-            flex: 1;
-            min-width: 250px;
-            max-width: 300px;
-            background-color: white;
-            border-radius: var(--border-radius);
-            padding: 35px 25px;
-            box-shadow: var(--shadow);
-            transition: all 0.3s;
-            text-align: left;
-            position: relative;
-        }
-        
-        .step-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        }
-        
-        .step-number {
-            position: absolute;
-            top: -15px;
-            left: -15px;
-            width: 40px;
-            height: 40px;
-            background: var(--gradient-primary);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-weight: 700;
-            font-size: 18px;
-            box-shadow: 0 4px 10px rgba(255, 95, 109, 0.3);
-        }
-        
-        .step-card:nth-child(2) .step-number {
-            background: linear-gradient(45deg, #FF9F59, #FCC171);
-        }
-        
-        .step-card:nth-child(3) .step-number {
-            background: var(--gradient-secondary);
-        }
-        
-        .step-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-        
-        .step-card h3 {
-            font-size: 20px;
-            margin-bottom: 15px;
-            color: var(--dark-color);
-        }
-        
-        .step-card p {
-            color: #606385;
+
+        .header p {
+            color: #6c757d;
+            font-size: 14px;
+            margin: 0;
             line-height: 1.6;
-            font-size: 15px;
         }
-        
-        .features {
+
+        /* --- 输入区域 --- */
+        .input-section {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin: 0 0 80px;
-        }
-        
-        .feature-card {
-            background-color: white;
-            border-radius: var(--border-radius);
-            padding: 30px;
-            box-shadow: var(--shadow);
-            transition: all 0.3s;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-        }
-        
-        .feature-card:before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 5px;
-            top: 0;
-            left: 0;
-            background: var(--gradient-primary);
-            z-index: -1;
-        }
-        
-        .feature-card:nth-child(2):before {
-            background: linear-gradient(45deg, #FF9F59, #FCC171);
-        }
-        
-        .feature-card:nth-child(3):before {
-            background: var(--gradient-secondary);
-        }
-        
-        .feature-card:nth-child(4):before {
-            background: linear-gradient(45deg, #5EFCE8, #736EFE);
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        }
-        
-        .feature-icon {
-            font-size: 50px;
-            margin-bottom: 20px;
-            display: inline-block;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        
-        .feature-card:nth-child(2) .feature-icon {
-            background: linear-gradient(45deg, #FF9F59, #FCC171);
-            -webkit-background-clip: text;
-            background-clip: text;
-        }
-        
-        .feature-card:nth-child(3) .feature-icon {
-            background: var(--gradient-secondary);
-            -webkit-background-clip: text;
-            background-clip: text;
-        }
-        
-        .feature-card:nth-child(4) .feature-icon {
-            background: linear-gradient(45deg, #5EFCE8, #736EFE);
-            -webkit-background-clip: text;
-            background-clip: text;
-        }
-        
-        .feature-card h3 {
-            font-size: 22px;
-            margin-bottom: 15px;
-            color: var(--dark-color);
-        }
-        
-        .feature-card p {
-            color: #606385;
-            line-height: 1.6;
-        }
-        
-        .result-section {
-            display: none;
-            margin: 60px 0;
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            padding: 40px;
-            position: relative;
-        }
-        
-        .result-tabs {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            overflow-x: auto;
-            padding-bottom: 5px;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        
-        .result-tabs::-webkit-scrollbar {
-            display: none;
-        }
-        
-        .tab {
-            padding: 12px 25px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            background-color: #F5F5FA;
-            color: #606385;
-            white-space: nowrap;
-        }
-        
-        .tab.active {
-            background: var(--gradient-primary);
-            color: white;
-            box-shadow: 0 4px 10px rgba(255, 95, 109, 0.3);
-        }
-        
-        .map-container {
-            height: 500px;
-            width: 100%;
-            background-color: #F8F8FC;
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .map-placeholder {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #A0A0B9;
-        }
-        
-        .map-icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        
-        .route-details {
-            margin-top: 40px;
-        }
-        
-        .route-details h3 {
-            margin-bottom: 25px;
-            font-size: 24px;
-            color: var(--dark-color);
-            position: relative;
-            display: inline-block;
-        }
-        
-        .route-details h3:after {
-            content: '';
-            position: absolute;
-            width: 50%;
-            height: 3px;
-            bottom: -8px;
-            left: 0;
-            background: var(--gradient-primary);
-            border-radius: 3px;
-        }
-        
-        .location-list {
-            display: flex;
-            flex-direction: column;
+            grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
-        
-        .location-card {
-            display: flex;
-            background-color: #F8F8FC;
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s;
-        }
-        
-        .location-card:hover {
-            transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .location-index {
-            width: 60px;
-            background: var(--gradient-secondary);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            font-weight: bold;
-        }
-        
-        .location-info {
-            padding: 20px;
-            flex: 1;
-        }
-        
-        .location-info h4 {
-            font-size: 18px;
-            margin-bottom: 12px;
-            color: var(--dark-color);
-        }
-        
-        .location-info p {
-            color: #606385;
-            margin-bottom: 8px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .location-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
-        }
-        
-        .tag {
-            background: linear-gradient(45deg, rgba(54, 209, 220, 0.1), rgba(91, 134, 229, 0.1));
-            color: #5B86E5;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        
-        .share-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 40px;
-            flex-wrap: wrap;
-        }
-        
-        .share-btn {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background-color: white;
-            border: 1px solid #E0E0F5;
-            padding: 12px 20px;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-        
-        .share-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .share-wechat:hover {
-            border-color: #2DC100;
-            background-color: rgba(45, 193, 0, 0.05);
-        }
-        
-        .share-weibo:hover {
-            border-color: #E6162D;
-            background-color: rgba(230, 22, 45, 0.05);
-        }
-        
-        .share-xiaohongshu:hover {
-            border-color: #FF2442;
-            background-color: rgba(255, 36, 66, 0.05);
-        }
-        
-        .share-icon {
-            font-size: 22px;
-        }
-        
-        .loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.9);
+
+        .input-group {
             display: flex;
             flex-direction: column;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .input-group label .tooltip {
+            margin-left: 8px;
+            font-size: 12px;
+            color: #fff;
+            background-color: #6c757d;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: inline-flex;
             justify-content: center;
             align-items: center;
-            z-index: 10;
-            display: none;
-            border-radius: var(--border-radius);
-            backdrop-filter: blur(5px);
-        }
-        
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(255, 95, 109, 0.2);
-            border-radius: 50%;
-            border-top-color: var(--primary-color);
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-        
-        .loading-text {
-            font-size: 18px;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            font-weight: 600;
-        }
-        
-        footer {
-            background-color: white;
-            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.03);
-            padding: 60px 0 20px;
-            margin-top: 80px;
+            cursor: help;
             position: relative;
         }
         
-        footer:before {
-            content: '';
+        .input-group .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 220px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
             position: absolute;
-            top: 0;
-            left: 0;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -110px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        .input-group .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+
+        .input-group input, .input-group select {
             width: 100%;
-            height: 5px;
-            background: var(--gradient-primary);
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
-        
-        .footer-content {
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 40px;
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.2);
         }
-        
-        .footer-logo {
-            font-size: 26px;
-            font-weight: 700;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 15px;
-        }
-        
-        .footer-desc {
-            max-width: 300px;
-            color: #606385;
-            line-height: 1.7;
-        }
-        
-        .footer-links h4 {
+
+        /* --- 按钮 --- */
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            margin-top: 30px;
+            background: linear-gradient(45deg, var(--primary-color), #ff8c00);
+            color: white;
+            border: none;
+            border-radius: 8px;
             font-size: 18px;
-            margin-bottom: 20px;
-            color: var(--dark-color);
-            position: relative;
-            display: inline-block;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(255, 102, 0, 0.3);
         }
-        
-        .footer-links h4:after {
-            content: '';
-            position: absolute;
-            width: 30px;
-            height: 2px;
-            bottom: -8px;
-            left: 0;
-            background: var(--gradient-primary);
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 102, 0, 0.4);
         }
-        
-        .footer-links ul {
-            list-style: none;
+
+        /* --- 结果区域 --- */
+        .results-section {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid var(--border-color);
+            display: none; /* 初始隐藏 */
         }
+
+        .results-section h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 20px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            text-align: center;
+        }
+
+        .result-card {
+            background-color: var(--bg-color);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .result-card .label {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
+
+        .result-card .value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .value.positive { color: var(--success-color); }
+        .value.negative { color: var(--danger-color); }
         
-        .footer-links li {
+        #roi-card .value {
+            color: var(--primary-color);
+        }
+
+        /* ROI 可视化条 */
+        .roi-bar-container {
+            margin-top: 30px;
+            background-color: var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            height: 30px;
+        }
+        .roi-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #FFC107, var(--primary-color));
+            width: 0%;
+            transition: width 1s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        /* --- 解释说明 --- */
+        .explanation {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e9f5ff;
+            border: 1px solid #b3d7f7;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.7;
+            color: #0c5460;
+        }
+        .explanation h3 {
+            margin-top: 0;
+            color: #0a4a55;
+        }
+        .explanation ul {
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+        .explanation li {
             margin-bottom: 10px;
         }
-        
-        .footer-links a {
-            color: #606385;
-            text-decoration: none;
-            transition: all 0.3s;
-            display: inline-block;
-        }
-        
-        .footer-links a:hover {
-            transform: translateX(5px);
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        
-        .social-links {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .social-link {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #F5F5FA;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 18px;
-            color: #606385;
-            transition: all 0.3s;
-        }
-        
-        .social-link:hover {
-            background: var(--gradient-primary);
-            color: white;
-            transform: translateY(-3px);
-        }
-        
-        .copyright {
-            text-align: center;
-            padding-top: 30px;
-            margin-top: 40px;
-            border-top: 1px solid #EEE;
-            color: #8C8CA1;
-            font-size: 14px;
-        }
-        
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .navbar {
-                flex-direction: column;
-                gap: 15px;
+
+        /* --- 响应式设计 --- */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
             }
-            
-            .hero h1 {
-                font-size: 2.2rem;
+            .calculator-container {
+                padding: 20px;
             }
-            
-            .hero p {
-                font-size: 1rem;
+            .input-section {
+                grid-template-columns: 1fr;
             }
-            
-            .upload-area {
-                height: 220px;
+            .header h1 {
+                font-size: 20px;
             }
-            
-            .upload-icon {
-                font-size: 50px;
-            }
-            
-            .section-title {
-                font-size: 2rem;
-            }
-            
-            .map-container {
-                height: 300px;
-            }
-            
-            .share-buttons {
-                justify-content: center;
-            }
-            
-            .footer-content {
-                flex-direction: column;
-                gap: 40px;
+            .results-grid {
+                grid-template-columns: 1fr 1fr;
             }
         }
     </style>
-</head>
+<script src="https://puc.poecdn.net/authenticated_preview_page/syncedState.3f7572448765332f3047.js"></script></head>
 <body>
-    <header>
-        <div class="container">
-            <nav class="navbar">
-                <div class="logo">
-                    <span class="logo-icon">📸</span>
-                    <span>一拍即行</span>
-                </div>
-                <div class="nav-links">
-                    <a href="#">首页</a>
-                    <a href="#">功能介绍</a>
-                    <a href="#">使用教程</a>
-                    <a href="#">关于我们</a>
-                </div>
-            </nav>
+
+    <div class="calculator-container">
+        <div class="header">
+            <h1>美团推广通投产比 (ROI) 计算器</h1>
+            <p>只需输入您店铺的几个关键数据，即可快速预估线上推广可能带来的效果。专为实体商家老板设计，无需运营经验。</p>
         </div>
-    </header>
-    
-    <main class="container">
-        <section class="hero">
-            <div class="floating-element float-1"></div>
-            <div class="floating-element float-2"></div>
-            <div class="floating-element float-3"></div>
-            
-            <h1>截图一拍，旅行即刻出发！</h1>
-            <p>只需上传大众点评截图，AI智能分析，瞬间生成完美旅行路线、详细攻略和精美手绘地图</p>
-            
-            <div class="upload-container">
-                <label for="file-input" class="upload-area">
-                    <div class="upload-icon">📱</div>
-                    <div class="upload-text">点击或拖拽上传大众点评截图</div>
-                    <div class="upload-subtext">支持多张截图同时上传，让旅程更丰富</div>
-                    <input type="file" id="file-input" accept="image/*" multiple="">
+
+        <div class="input-section">
+            <div class="input-group">
+                <label for="budget">1. 您计划的月推广预算 (元)
+                    <span class="tooltip">?
+                        <span class="tooltip-text">您打算一个月花多少钱在美团上做推广。建议初期可以从一个较小的数额开始测试。</span>
+                    </span>
                 </label>
-                <button class="btn" id="generate-btn">一键生成旅行方案</button>
+                <input type="number" id="budget" placeholder="例如: 3000" value="3000">
             </div>
-        </section>
-        
-        <section class="how-it-works">
-            <h2 class="section-title">三步玩转旅行规划</h2>
-            <p class="section-subtitle">简单易用，让旅行规划变得轻松又有趣</p>
-            
-            <div class="steps">
-                <div class="step-card">
-                    <div class="step-number">1</div>
-                    <div class="step-icon">📸</div>
-                    <h3>收集&amp;上传</h3>
-                    <p>浏览大众点评，为心仪的目的地截图，然后上传到一拍即行平台。</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">2</div>
-                    <div class="step-icon">✨</div>
-                    <h3>AI分析</h3>
-                    <p>智能算法快速分析截图内容，提取地点、评分、特色等关键信息。</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">3</div>
-                    <div class="step-icon">🗺️</div>
-                    <h3>获取方案</h3>
-                    <p>一键生成最优旅行路线、详细攻略和风格独特的手绘地图，随时出发！</p>
-                </div>
+            <div class="input-group">
+                <label for="avgOrderValue">2. 您的顾客平均消费 (元)
+                    <span class="tooltip">?
+                        <span class="tooltip-text">顾客平均每一单在您店里花多少钱，也就是“客单价”。这是您最熟悉的数据。</span>
+                    </span>
+                </label>
+                <input type="number" id="avgOrderValue" placeholder="例如: 85" value="85">
             </div>
-        </section>
-        
-        <section class="features">
-            <div class="feature-card">
-                <div class="feature-icon">🔍</div>
-                <h3>智能识别</h3>
-                <p>先进图像识别技术，精确提取大众点评截图中的店铺名称、位置、评分和特色信息。</p>
+            <div class="input-group">
+                <label for="cpc">3. 预估单次点击花费 (元)
+                    <span class="tooltip">?
+                        <span class="tooltip-text">每次有顾客在美团上点击您的店铺，您需要付的费用。这个价格因行业、地区竞争激烈程度而异，一般在0.5元到5元之间。</span>
+                    </span>
+                </label>
+                <input type="number" id="cpc" placeholder="例如: 1.5" value="1.5">
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">📍</div>
-                <h3>路线规划</h3>
-                <p>基于地理位置和时间优化，自动生成最高效合理的游览路线，节省宝贵旅行时间。</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">📝</div>
-                <h3>攻略定制</h3>
-                <p>为每个地点提供专属游览建议、特色推荐和实用小贴士，让旅行更加轻松愉快。</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🎨</div>
-                <h3>手绘地图</h3>
-                <p>生成独特风格的手绘地图，标注所有景点和路线，一键分享朋友圈，收获点赞无数。</p>
-            </div>
-        </section>
-        
-        <section class="result-section" id="result-section">
-            <div class="loading-overlay" id="loading-overlay">
-                <div class="spinner"></div>
-                <div class="loading-text">正在为你创建完美旅行方案...</div>
-            </div>
-            
-            <div class="result-tabs">
-                <div class="tab active" data-tab="map">手绘地图</div>
-                <div class="tab" data-tab="route">推荐路线</div>
-                <div class="tab" data-tab="guide">详细攻略</div>
-                <div class="tab" data-tab="share">分享设置</div>
-            </div>
-            
-            <div class="map-container">
-                <div class="map-placeholder">
-                    <div class="map-icon">🗺️</div>
-                    <p>你的专属手绘地图即将呈现</p>
-                </div>
-            </div>
-            
-            <div class="route-details">
-                <h3>最佳游览路线</h3>
-                <div class="location-list">
-                    <!-- 示例地点卡片 -->
-                    <div class="location-card">
-                        <div class="location-index">1</div>
-                        <div class="location-info">
-                            <h4>小桃园（外滩店）</h4>
-                            <p>⭐️ 4.8分 | 人均：¥120 | 上海菜</p>
-                            <p>🕙 建议游览：11:30-13:00 (90分钟)</p>
-                            <div class="location-tags">
-                                <span class="tag">必吃招牌</span>
-                                <span class="tag">人气网红</span>
-                                <span class="tag">景观餐厅</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="location-card">
-                        <div class="location-index">2</div>
-                        <div class="location-info">
-                            <h4>上海博物馆</h4>
-                            <p>⭐️ 4.9分 | 门票：免费 | 博物馆</p>
-                            <p>🕙 建议游览：13:30-15:30 (120分钟)</p>
-                            <div class="location-tags">
-                                <span class="tag">文化体验</span>
-                                <span class="tag">室内景点</span>
-                                <span class="tag">免费参观</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="location-card">
-                        <div class="location-index">3</div>
-                        <div class="location-info">
-                            <h4>外滩公园</h4>
-                            <p>⭐️ 4.7分 | 门票：免费 | 公园景点</p>
-                            <p>🕙 建议游览：16:00-17:30 (90分钟)</p>
-                            <div class="location-tags">
-                                <span class="tag">观景胜地</span>
-                                <span class="tag">拍照打卡</span>
-                                <span class="tag">户外活动</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="share-buttons">
-                <div class="share-btn share-wechat">
-                    <span class="share-icon">📱</span>
-                    <span>分享到微信</span>
-                </div>
-                <div class="share-btn share-weibo">
-                    <span class="share-icon">📱</span>
-                    <span>分享到微博</span>
-                </div>
-                <div class="share-btn share-xiaohongshu">
-                    <span class="share-icon">📱</span>
-                    <span>分享到小红书</span>
-                </div>
-            </div>
-        </section>
-    </main>
-    
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-about">
-                    <div class="footer-logo">一拍即行</div>
-                    <p class="footer-desc">用AI重新定义旅行规划，让每一次出行都轻松愉快，充满惊喜！</p>
-                    <div class="social-links">
-                        <a href="#" class="social-link">微</a>
-                        <a href="#" class="social-link">微</a>
-                        <a href="#" class="social-link">红</a>
-                        <a href="#" class="social-link">抖</a>
-                    </div>
-                </div>
-                
-                <div class="footer-links">
-                    <h4>产品功能</h4>
-                    <ul>
-                        <li><a href="#">智能路线规划</a></li>
-                        <li><a href="#">手绘地图生成</a></li>
-                        <li><a href="#">攻略定制</a></li>
-                        <li><a href="#">社交分享</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-links">
-                    <h4>使用教程</h4>
-                    <ul>
-                        <li><a href="#">新手指南</a></li>
-                        <li><a href="#">常见问题</a></li>
-                        <li><a href="#">使用技巧</a></li>
-                        <li><a href="#">最佳实践</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-links">
-                    <h4>关于我们</h4>
-                    <ul>
-                        <li><a href="#">公司介绍</a></li>
-                        <li><a href="#">联系我们</a></li>
-                        <li><a href="#">使用条款</a></li>
-                        <li><a href="#">隐私政策</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="copyright">
-                © 2025 一拍即行 - 让旅行规划更简单、更快乐！
+            <div class="input-group">
+                <label for="conversionScenario">4. 选择您的店铺转化情景
+                    <span class="tooltip">?
+                        <span class="tooltip-text">这是最重要的预估！代表100个点击您店铺的人里，大概有几个人会最终下单。新店/评价少选保守，成熟/活动多选乐观。</span>
+                    </span>
+                </label>
+                <select id="conversionScenario">
+                    <option value="0.01">保守预估 (1%) - 适合新店、客单价高</option>
+                    <option value="0.03" selected="">一般水平 (3%) - 适合多数经营稳定的店铺</option>
+                    <option value="0.05">乐观情况 (5%) - 适合高好评、高性价比、活动力度大的店铺</option>
+                </select>
             </div>
         </div>
-    </footer>
-    
+
+        <button id="calculateBtn" class="calculate-btn">开始计算推广效果</button>
+
+        <div id="results" class="results-section">
+            <h2>推广效果预估报告</h2>
+            <div class="results-grid">
+                <div class="result-card">
+                    <div class="label">预计带来总点击</div>
+                    <div class="value" id="totalClicks">0</div>
+                </div>
+                <div class="result-card">
+                    <div class="label">预计新增顾客数</div>
+                    <div class="value" id="totalCustomers">0</div>
+                </div>
+                <div class="result-card">
+                    <div class="label">预计新增营业额</div>
+                    <div class="value" id="totalRevenue">0 元</div>
+                </div>
+                <div class="result-card" id="roi-card">
+                    <div class="label">投产比 (ROI)</div>
+                    <div class="value" id="roi">1 : 0</div>
+                </div>
+            </div>
+            <div class="roi-bar-container">
+                <div id="roiBar" class="roi-bar"></div>
+            </div>
+        </div>
+
+        <div id="explanation" class="explanation" style="display: none;">
+            <h3>结果解读与重要提示</h3>
+            <ul>
+                <li><strong>什么是投产比 (ROI)？</strong> 投产比是 “投入产出比” 的简称。例如 <strong>1 : 5</strong> 就意味着您每投入1元广告费，就能产生5元营业额。通常来说，餐饮行业的ROI达到 <strong>1 : 3</strong> 到 <strong>1 : 5</strong> 就比较健康。</li>
+                <li><strong>这只是一个估算模型：</strong> 实际效果会受到您店铺的装修、评价、菜单设计、套餐吸引力、客服回复速度等多种因素影响。推广通是“放大器”，它能把好的店铺带给更多人，但无法让一个差的店铺变好。</li>
+                <li><strong>如何提升转化率？</strong> 这是提升ROI的关键！优化您的店铺主图、推出有竞争力的团购套餐、积极回复用户评价、保持良好的服务质量，都能有效提高“点击到下单”的转化率。</li>
+                <li><strong>建议：</strong> 使用这个计算器作为决策参考，从小预算开始测试，根据实际数据不断调整您的推广策略和店铺运营。</li>
+            </ul>
+        </div>
+    </div>
+
     <script>
-        // 预览上传图片
-        const fileInput = document.getElementById('file-input');
-        const uploadArea = document.querySelector('.upload-area');
-        const generateBtn = document.getElementById('generate-btn');
-        const resultSection = document.getElementById('result-section');
-        const loadingOverlay = document.getElementById('loading-overlay');
-        const tabs = document.querySelectorAll('.tab');
-        
-        // 拖拽上传
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.style.backgroundColor = 'rgba(255, 95, 109, 0.05)';
-            uploadArea.style.borderColor = 'var(--primary-color)';
-            uploadArea.style.transform = 'translateY(-5px)';
-        });
-        
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
-            uploadArea.style.borderColor = '#E0E0F5';
-            uploadArea.style.transform = 'translateY(0)';
-        });
-        
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
-            uploadArea.style.borderColor = '#E0E0F5';
-            uploadArea.style.transform = 'translateY(0)';
-            
-            if (e.dataTransfer.files.length > 0) {
-                fileInput.files = e.dataTransfer.files;
-                updateUploadAreaPreview(e.dataTransfer.files);
-            }
-        });
-        
-        fileInput.addEventListener('change', () => {
-            if (fileInput.files.length > 0) {
-                updateUploadAreaPreview(fileInput.files);
-            }
-        });
-        
-        function updateUploadAreaPreview(files) {
-            const uploadIcon = document.querySelector('.upload-icon');
-            const uploadText = document.querySelector('.upload-text');
-            const uploadSubtext = document.querySelector('.upload-subtext');
-            
-            uploadIcon.textContent = '✅';
-            uploadText.textContent = `已成功上传 ${files.length} 张截图`;
-            uploadSubtext.textContent = '点击重新上传 或 点击下方按钮生成方案';
-        }
-        
-        // 生成路线
-        generateBtn.addEventListener('click', () => {
-            if (fileInput.files.length === 0) {
-                alert('请先上传大众点评截图');
+        // 获取所有需要的DOM元素
+        const budgetInput = document.getElementById('budget');
+        const avgOrderValueInput = document.getElementById('avgOrderValue');
+        const cpcInput = document.getElementById('cpc');
+        const conversionScenarioSelect = document.getElementById('conversionScenario');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resultsSection = document.getElementById('results');
+        const explanationSection = document.getElementById('explanation');
+
+        // 获取结果展示的元素
+        const totalClicksSpan = document.getElementById('totalClicks');
+        const totalCustomersSpan = document.getElementById('totalCustomers');
+        const totalRevenueSpan = document.getElementById('totalRevenue');
+        const roiSpan = document.getElementById('roi');
+        const roiBar = document.getElementById('roiBar');
+
+        // 为计算按钮添加点击事件监听器
+        calculateBtn.addEventListener('click', function() {
+            // 1. 获取并转换输入值
+            const budget = parseFloat(budgetInput.value);
+            const avgOrderValue = parseFloat(avgOrderValueInput.value);
+            const cpc = parseFloat(cpcInput.value);
+            const conversionRate = parseFloat(conversionScenarioSelect.value);
+
+            // 2. 输入验证
+            if (isNaN(budget) || isNaN(avgOrderValue) || isNaN(cpc) || budget <= 0 || avgOrderValue <= 0) {
+                alert('请输入有效的、大于0的数字！');
                 return;
             }
+            if (cpc <= 0) {
+                alert('单次点击花费必须大于0！');
+                return;
+            }
+
+            // 3. 执行核心计算
+            // 总点击数 = 总预算 / 单次点击花费
+            const totalClicks = budget / cpc;
             
-            // 显示加载中
-            resultSection.style.display = 'block';
-            loadingOverlay.style.display = 'flex';
+            // 新增顾客数 = 总点击数 * 转化率
+            const totalCustomers = totalClicks * conversionRate;
             
-            // 模拟加载过程
-            setTimeout(() => {
-                loadingOverlay.style.display = 'none';
-                
-                // 滚动到结果区域
-                resultSection.scrollIntoView({ behavior: 'smooth' });
-            }, 2000);
-        });
-        
-        // 切换标签
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                
-                // 这里可以添加切换内容的逻辑
-            });
+            // 新增营业额 = 新增顾客数 * 客单价
+            const totalRevenue = totalCustomers * avgOrderValue;
+            
+            // 投产比 (ROI) = 新增营业额 / 总预算
+            const roi = totalRevenue / budget;
+
+            // 4. 更新并显示结果
+            // 使用 toFixed() 格式化数字，使其更易读
+            totalClicksSpan.innerText = Math.round(totalClicks).toLocaleString();
+            totalCustomersSpan.innerText = Math.round(totalCustomers).toLocaleString();
+            totalRevenueSpan.innerText = totalRevenue.toFixed(0).toLocaleString() + ' 元';
+            roiSpan.innerText = '1 : ' + roi.toFixed(1);
+
+            // 更新ROI可视化条
+            // 我们设定ROI为5时，进度条达到100%，这样更直观
+            const barWidth = Math.min((roi / 5) * 100, 100); 
+            roiBar.style.width = barWidth + '%';
+            roiBar.innerText = '投产比 1:' + roi.toFixed(1);
+
+            // 显示结果和解释说明区域
+            resultsSection.style.display = 'block';
+            explanationSection.style.display = 'block';
+            
+            // 平滑滚动到结果区域，提升用户体验
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
         });
     </script>
+
 
 
 </body></html>
